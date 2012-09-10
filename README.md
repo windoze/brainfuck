@@ -8,7 +8,7 @@ The project contains a full-functional compiler and a JIT runner for the languag
 Installation
 ------------
 
-Before installing the program, you'll need to install [LLVM](http://llvm.org) 3.1 or higher and a working C/C++ linker, [Clang]("http://clang.llvm.org") is recommended as [GCC]("http://gcc.gnu.org") failed to link on some platforms. 
+Before installing the program, you'll need to install [LLVM](http://llvm.org) 3.1 or higher and a working C/C++ linker, [Clang](http://clang.llvm.org) is recommended as [GCC](http://gcc.gnu.org) failed to link on some platforms. 
 
 Usage
 -----
