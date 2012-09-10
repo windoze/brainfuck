@@ -16,7 +16,7 @@ INCLUDE_DIRECTORIES(
 )
 
 add_executable(bfc1 bfast.h bfcodegen.h bfcodegen.cpp bfparser.h bfcompiler.h bfcompiler.cpp bfc1.cpp)
-TARGET_LINK_LIBRARIES(bfc1 ${LLVM_LDFLAGS} -L${LLVM_LIB_DIR} ${LLVM_LIBS_CORE} ${LLVM_LIBS_JIT} dl pthread)
+TARGET_LINK_LIBRARIES(bfc1 ${LLVM_LDFLAGS} -L${LLVM_LIB_DIR} ${LLVM_LIBS_CORE} dl pthread)
 
 file(COPY ${CMAKE_SOURCE_DIR}/bfc DESTINATION ${EXECUTABLE_OUTPUT_PATH})
 

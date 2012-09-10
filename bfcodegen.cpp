@@ -13,13 +13,6 @@
 #include <llvm/Support/IRBuilder.h>
 #include <llvm/Module.h>
 #include <llvm/Analysis/Verifier.h>
-#include <llvm/PassManager.h>
-#include <llvm/Analysis/Passes.h>
-#include <llvm/Target/TargetData.h>
-#include <llvm/Transforms/Scalar.h>
-#include <llvm/Support/TargetSelect.h>
-#include <llvm/ExecutionEngine/ExecutionEngine.h>
-#include <llvm/ExecutionEngine/JIT.h>
 
 using namespace llvm;
 namespace brainfuck {
