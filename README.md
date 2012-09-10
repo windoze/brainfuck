@@ -1,7 +1,7 @@
 brainfuck
 =========
 
-[Brainfuck](http://en.wikipedia.org/wiki/Brainfuck) is an esoteric programming language noted for its extreme minimalism. It is a [Turing tarpit](http://en.wikipedia.org/wiki/Turing_tarpit), designed to challenge and amuse programmers, and was not made to be suitable for practical use.[1] It was created in 1993 by Urban Müller.
+[Brainfuck](http://en.wikipedia.org/wiki/Brainfuck) is an esoteric programming language noted for its extreme minimalism. It is a [Turing tarpit](http://en.wikipedia.org/wiki/Turing_tarpit), designed to challenge and amuse programmers, and was not made to be suitable for practical use. It was created in 1993 by Urban Müller.
 
 The project contains a full-functional compiler and a JIT runner for the language.
 
