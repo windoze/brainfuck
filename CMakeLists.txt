@@ -62,7 +62,12 @@ target_compile_options(bf
 )
 
 install(
-  TARGETS bf
+  TARGETS bf bfc1
   RUNTIME
+  DESTINATION bin
+)
+
+install(
+  PROGRAMS scripts/bfc
   DESTINATION bin
 )

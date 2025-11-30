@@ -1,0 +1,176 @@
+#!/usr/bin/env python3
+import sys
+import os
+import subprocess
+from optparse import OptionParser
+
+
+class BFCCompiler:
+
+    def __init__(self):
+        self.bfc_path = os.path.abspath(sys.argv[0])
+        self.script_dir = os.path.dirname(self.bfc_path)
+        self.current_dir = os.getcwd()
+
+        self.options = None
+        self.args = None
+        self.search_paths = []
+        self.bfc1_path = None
+        self.bf_path = None
+        self.llc_path = None
+        self.linker_path = None
+
+    def _mapping(self):
+        return [
+            self.script_dir,
+            os.path.join(self.script_dir, "build", "bin"),
+            ".",
+            "/usr/local/bin",
+            "/usr/bin"
+        ]
+
+    def _find_exec(self, name, search_paths):
+        for path in search_paths:
+            full_path = os.path.join(path, name)
+            if os.path.exists(full_path) and os.access(full_path, os.X_OK):
+                return full_path
+        return None
+
+    def _argparse(self):
+        parser = OptionParser()
+        parser.add_option(
+            "-o", "--output",
+            dest="executable",
+            help="write executable to FILE",
+            metavar="FILE",
+            default="./a_bf.out"
+        )
+        parser.add_option(
+            "--bfc1",
+            dest="bfc1_path",
+            help="path to bfc1 executable",
+            metavar="PATH"
+        )
+        parser.add_option(
+            "--bf",
+            dest="bf_path",
+            help="path to bf executable",
+            metavar="PATH"
+        )
+        parser.add_option(
+            "--search-path",
+            dest="search_paths",
+            action="append",
+            help="additional paths to search for executables",
+            metavar="PATH"
+        )
+
+        self.options, self.args = parser.parse_args()
+
+        if self.options.search_paths:
+            self.search_paths.extend(self.options.search_paths)
+        self.search_paths.extend(self._mapping())
+
+    def locate_bfc1(self):
+        if self.options.bfc1_path:
+            self.bfc1_path = self.options.bfc1_path
+            if not os.path.exists(self.bfc1_path):
+                print(f"Error: bfc1 not found at specified path: {self.bfc1_path}", file=sys.stderr)
+                sys.exit(1)
+        else:
+            self.bfc1_path = self._find_exec("bfc1", self.search_paths)
+            if not self.bfc1_path:
+                print("Error: bfc1 not found in any of the following paths:", file=sys.stderr)
+                for path in self.search_paths:
+                    print(f"  {path}", file=sys.stderr)
+                sys.exit(1)
+
+        print(f"Using bfc1: {self.bfc1_path}", file=sys.stderr)
+
+    def locate_bf(self):
+        if self.options.bf_path:
+            self.bf_path = self.options.bf_path
+            if not os.path.exists(self.bf_path):
+                print(f"Warning: bf not found at specified path: {self.bf_path}", file=sys.stderr)
+                self.bf_path = None
+        else:
+            self.bf_path = self._find_exec("bf", self.search_paths)
+
+        if self.bf_path:
+            print(f"Using bf: {self.bf_path}", file=sys.stderr)
+
+    def locate_llvm_llc(self):
+        try:
+            llvm_bin_dir = subprocess.check_output(
+                ["llvm-config", "--bindir"],
+                text=True
+            ).strip()
+        except (subprocess.CalledProcessError, FileNotFoundError):
+            print("LLVM not found", file=sys.stderr)
+            sys.exit(1)
+
+        if not llvm_bin_dir:
+            print("LLVM not found", file=sys.stderr)
+            sys.exit(1)
+        self.llc_path = os.path.join(llvm_bin_dir, "llc")
+
+    def locate_linker(self):
+        for linker_cmd in ["clang", "gcc", "cc"]:
+            try:
+                self.linker_path = subprocess.check_output(
+                    ["which", linker_cmd],
+                    text=True
+                ).strip()
+                if self.linker_path:
+                    break
+            except (subprocess.CalledProcessError, FileNotFoundError):
+                continue
+
+        if not self.linker_path:
+            print("Clang or GCC not found", file=sys.stderr)
+            sys.exit(1)
+
+    def _build_cmd(self):
+        if len(self.args) <= 0:
+            print(f"{os.path.basename(self.bfc_path)}: error: no input files", file=sys.stderr)
+            sys.exit(1)
+
+        linker_args = "-pipe -no-pie"
+        llc_args = "-O3"
+
+        cmd_tmpl = ''' "{0}" "{1}" | "{2}" {5} | "{3}" {4} -o "{6}" -x assembler -'''
+        compile_cmd = cmd_tmpl.format(
+            self.bfc1_path,
+            self.args[0],
+            self.llc_path,
+            self.linker_path,
+            linker_args,
+            llc_args,
+            self.options.executable
+        )
+
+        return compile_cmd
+
+    def run_compilation(self, compile_cmd):
+        print(f"Running: {compile_cmd}", file=sys.stderr)
+        result = os.system(compile_cmd)
+
+        if result != 0:
+            print(f"Compilation failed with exit code: {result}", file=sys.stderr)
+            sys.exit(result)
+
+
+    def run(self):
+        self._argparse()
+        self.locate_bfc1()
+        self.locate_bf()
+        self.locate_llvm_llc()
+        self.locate_linker()
+
+        compile_cmd = self._build_cmd()
+        self.run_compilation(compile_cmd)
+
+
+if __name__ == "__main__":
+    compiler = BFCCompiler()
+    compiler.run()
