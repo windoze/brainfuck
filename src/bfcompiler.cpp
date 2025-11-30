@@ -6,21 +6,15 @@
 //  Copyright (c) 2012 Xu Chen. All rights reserved.
 //
 
-#ifndef __STDC_CONSTANT_MACROS
-#  define __STDC_CONSTANT_MACROS
-#endif
-#ifndef __STDC_FORMAT_MACROS
-#  define __STDC_FORMAT_MACROS
-#endif
-#ifndef __STDC_LIMIT_MACROS
-#  define __STDC_LIMIT_MACROS
-#endif
+// Upgrade to LLVM 18
+// by 星灿长风v(StarWindv) on 2025/11/29
+
 
 #include <string>
 #include <iostream>
 #include <fstream>
-#include <llvm/LLVMContext.h>
-#include <llvm/Module.h>
+#include <llvm/IR/LLVMContext.h>
+#include <llvm/IR/Module.h>
 #include <llvm/Support/raw_os_ostream.h>
 #include "bfparser.h"
 #include "bfast.h"
@@ -32,17 +26,17 @@ namespace brainfuck {
         std::string s((std::istreambuf_iterator<char>(src)),
                       std::istreambuf_iterator<char>());
         ast::Program prog;
-        bool ret=parser::parse(s.begin(), s.end(), prog);
+        bool ret = parser::parse(s.begin(), s.end(), prog);
         if (!ret) {
             std::cerr << "Syntax error\n";
             exit(1);
         }
         
-        llvm::LLVMContext &c=llvm::getGlobalContext();
-        llvm::Module *m=new llvm::Module("brainfuck", c);
-        brainfuck::codegen(*m, prog);
+        llvm::LLVMContext context;
+        std::unique_ptr<llvm::Module> module = std::make_unique<llvm::Module>("brainfuck", context);
+        brainfuck::codegen(*module, prog);
         
         llvm::raw_os_ostream os(ir);
-        os << *m;
+        module->print(os, nullptr);
     }
 }   // End of namespace brainfuck
