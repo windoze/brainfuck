@@ -6,17 +6,11 @@
 //  Copyright (c) 2012 Xu Chen. All rights reserved.
 //
 
-#ifndef __STDC_CONSTANT_MACROS
-#  define __STDC_CONSTANT_MACROS
-#endif
-#ifndef __STDC_FORMAT_MACROS
-#  define __STDC_FORMAT_MACROS
-#endif
-#ifndef __STDC_LIMIT_MACROS
-#  define __STDC_LIMIT_MACROS
-#endif
+// Upgrade to LLVM 18
+// by 星灿长风v(StarWindv) on 2025/11/29
 
-#include <llvm/Module.h>
+
+#include <llvm/IR/Module.h>
 #include "bfast.h"
 
 #ifndef brainfuck_bfcodegen_h
